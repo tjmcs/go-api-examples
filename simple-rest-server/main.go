@@ -14,19 +14,21 @@ import (
 )
 
 func getIndexByTaskID(taskID string) (index int, err error) {
+	// We didn't find the task ID - return an error and set the index to -1...
+	err = error.New("GetIndexByTaskID: TaskID " + taskID + " Not Found.")
+	index = -1
+
 	accessTasks.Lock()
-	defer accesTasks.Unlock()
+	defer accessTasks.Unlock()
 
 	// Search for the taskID and return the index.
 	for i, line := range allTask {
 		if taskID == line.ID {
 			index = i
+			err = nil
 			return
 		}
 	}
-	// We didn't find the task ID - return an error and set the index to -1...
-	err = error.New("GetIndexByTaskID: TaskID " + taskID + " Not Found.")
-	index = -1
 }
 
 type Task struct {
