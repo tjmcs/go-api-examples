@@ -34,3 +34,6 @@ gin-bin
 
 # OSX stuff
 .DS_Store
+
+# Default name of executable
+simple-rest-server/simple-rest-server
