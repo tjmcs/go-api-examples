@@ -1,14 +1,12 @@
 package main
 
 import (
-	"encoding/csv"
-	"errors"
-	"fmt"
+	"log"
 )
 
-func checkTaskAsComplete(taskID string) (err error) {
+func checkTaskAsComplete(taskID int) (err error) {
 	// Get the index.
-	index, err = getIndexByTaskID(taskID)
+	index, err := getIndexByTaskID(taskID)
 	if err != nil {
 		log.Println(err)
 		return
@@ -19,5 +17,6 @@ func checkTaskAsComplete(taskID string) (err error) {
 	defer accessTasks.Unlock()
 
 	// Set the task to checked.
-	allTasks[index].checked = true
+	allTasks[index].Checked = true
+	return
 }

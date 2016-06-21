@@ -1,12 +1,24 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"net/http"
-
 	"github.com/julienschmidt/httprouter"
+	"io/ioutil"
+	"net/http"
 )
 
-func DeleteTask(respWriter http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	fmt.Fprintf(respWriter, "Show Details for ToDo '%s'\n", params.ByName("todelete"))
+func DeleteTask(respWriter http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+	var remove Remove
+	body, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = json.Unmarshal(body, &remove)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	removeTaskByID(remove.ID)
+
 }

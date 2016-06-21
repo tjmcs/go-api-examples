@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -13,22 +14,23 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func getIndexByTaskID(taskID string) (index int, err error) {
+func getIndexByTaskID(taskID int) (index int, err error) {
 	// We didn't find the task ID - return an error and set the index to -1...
-	err = error.New("GetIndexByTaskID: TaskID " + taskID + " Not Found.")
+	err = errors.New("GetIndexByTaskID: TaskID " + string(taskID) + " Not Found.")
 	index = -1
 
 	accessTasks.Lock()
 	defer accessTasks.Unlock()
 
 	// Search for the taskID and return the index.
-	for i, line := range allTask {
+	for i, line := range allTasks {
 		if taskID == line.ID {
 			index = i
 			err = nil
-			return
+			break
 		}
 	}
+	return
 }
 
 type Task struct {

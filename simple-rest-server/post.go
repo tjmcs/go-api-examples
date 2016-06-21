@@ -9,6 +9,10 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+type Remove struct {
+	ID int `json:"id"`
+}
+
 func AddTask(respWriter http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	var task Task
 	body, err := ioutil.ReadAll(request.Body)
