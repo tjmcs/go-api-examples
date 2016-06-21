@@ -19,5 +19,5 @@ func checkTaskAsComplete(taskID string) (err error) {
 	defer accessTasks.Unlock()
 
 	// Set the task to checked.
-	allTasks.checked = true
+	allTasks[index].checked = true
 }
