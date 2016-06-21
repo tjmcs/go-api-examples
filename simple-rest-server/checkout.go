@@ -6,22 +6,18 @@ import (
 	"fmt"
 )
 
-func getIndexByTaskID(taskID string, csv [][]string) (index int, err error) {
-	for i, line := range csv {
-		if taskID == line[0] {
-			index = i
-			return
-		}
-	}
-	err = error.New("GetIndexByTaskID: TaskID " + taskID + " Not Found.")
-	index = -1
-}
-
-func checkTaskAsComplete(taskID string, csv [][]string) (err error) {
-	index, err = getIndexByTaskID(taskID, csv)
+func checkTaskAsComplete(taskID string) (err error) {
+	// Get the index.
+	index, err = getIndexByTaskID(taskID)
 	if err != nil {
 		log.Println(err)
-		return err
+		return
 	}
-	csv[index][1] = 1
+
+	// Lock the tasks.
+	accessTasks.Lock()
+	defer accessTasks.Unlock()
+
+	// Set the task to checked.
+	allTasks.checked = true
 }
