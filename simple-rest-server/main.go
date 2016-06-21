@@ -11,8 +11,8 @@ func main() {
 	router := httprouter.New()
 	router.GET("/search", SearchTask)
 	router.GET("/list", ListTask)
-	router.POST("/add/:toadd", AddTask)
-	router.DELETE("/delete/:todelete", DeleteTask)
+	router.POST("/add", AddTask)
+	router.DELETE("/delete", DeleteTask)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
