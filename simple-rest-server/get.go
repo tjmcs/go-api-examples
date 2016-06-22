@@ -56,19 +56,23 @@ func SearchTask(respWriter http.ResponseWriter, request *http.Request, params ht
 }
 
 func searchByWord(query string) (result []int) {
+	accessTasks.Lock()
 	for i, task := range allTasks {
 		if strings.Contains(task.Task, query) {
 			result = append(result, i)
 		}
 	}
+	accessTasks.Unlock()
 	return
 }
 
 func searchByTime(query time.Time) (result []int) {
+	accessTasks.Lock()
 	for i, task := range allTasks {
 		if task.TimeAdded.Before(query) || task.TimeAdded == query {
 			result = append(result, i)
 		}
 	}
+	accessTasks.Unlock()
 	return
 }
