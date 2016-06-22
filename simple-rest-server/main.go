@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -12,6 +13,25 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 )
+
+func getIndexByTaskID(taskID int) (index int, err error) {
+	// If we didn't find the task ID - return an error and set the index to -1...
+	err = errors.New("GetIndexByTaskID: TaskID " + string(taskID) + " Not Found.")
+	index = -1
+
+	accessTasks.Lock()
+
+	// Search for the taskID and return the index.
+	for i, line := range allTasks {
+		if taskID == line.ID {
+			index = i
+			err = nil
+			break
+		}
+	}
+	accessTasks.Unlock()
+	return
+}
 
 type Task struct {
 	ID        int
@@ -35,9 +55,12 @@ func main() {
 	// Loading the csv file into the RAM
 	csvfile, err := os.Open("tasks.csv")
 	ifPanic(err)
+
+	// Loading csv with csv Library returns [][]string
 	rawCSVdata, err := csv.NewReader(csvfile).ReadAll()
 	ifPanic(err)
 
+	// For each line in csv do....
 	for i, each := range rawCSVdata {
 		timeAdded, err := time.Parse(timeFormat, each[2])
 		ifPanic(err)
@@ -52,6 +75,8 @@ func main() {
 
 	// Autosave every minutes
 	csvfile.Close()
+
+	// go func() starts a new process.
 	go func() {
 		for {
 			saveCSV()
@@ -61,14 +86,17 @@ func main() {
 
 	// Start the API
 	router := httprouter.New()
+	router.GET("/", Index)
 	router.GET("/search", SearchTask)
 	router.GET("/list", ListTask)
 	router.POST("/add", AddTask)
+	router.POST("/checkoff", CheckOff)
 	router.DELETE("/delete", DeleteTask)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
+// Function to save the CSV
 func saveCSV() {
 	myString := ""
 	accessTasks.Lock()
