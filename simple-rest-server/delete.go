@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/julienschmidt/httprouter"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 type Remove struct {
@@ -25,6 +26,7 @@ func DeleteTask(respWriter http.ResponseWriter, request *http.Request, _ httprou
 	}
 
 	removeTaskByID(remove.ID)
+	// TODO: error 400, print it on the body
 }
 
 func removeTaskByID(taskID int) (err error) {
