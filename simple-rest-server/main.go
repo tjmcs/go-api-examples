@@ -54,15 +54,15 @@ func main() {
 
 	// Loading the csv file into the RAM
 	csvfile, err := os.Open("tasks.csv")
-	panic(err)
+	ifPanic(err)
 	rawCSVdata, err := csv.NewReader(csvfile).ReadAll()
-	panic(err)
+	ifPanic(err)
 
 	for i, each := range rawCSVdata {
 		timeAdded, err := time.Parse(timeFormat, each[2])
-		panic(err)
+		ifPanic(err)
 		deadline, err := time.Parse(timeFormat, each[3])
-		panic(err)
+		ifPanic(err)
 		status := false
 		if each[1] == "true" {
 			status = true
@@ -81,6 +81,7 @@ func main() {
 
 	// Start the API
 	router := httprouter.New()
+	router.GET("/", Index)
 	router.GET("/search", SearchTask)
 	router.GET("/list", ListTask)
 	router.POST("/add", AddTask)
@@ -99,7 +100,7 @@ func saveCSV() {
 	accessTasks.Unlock()
 }
 
-func panic(err error) {
+func ifPanic(err error) {
 	if err != nil {
 		// Maybe change to log later
 		fmt.Println(err)
