@@ -42,10 +42,15 @@ func SearchTask(respWriter http.ResponseWriter, request *http.Request, params ht
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		fmt.Println(err)
+		fmt.Fprintln(respWriter, "Bad request: %v", err)
+		log.Println(err)
+		respWriter.WriteHeader(400)
 	}
 	err = json.Unmarshal(body, &query)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(respWriter, "Bad request: %v", err)
+		log.Println(err)
+		respWriter.WriteHeader(400)
 	}
 
 	var indicies []int

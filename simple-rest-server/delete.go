@@ -18,11 +18,15 @@ func DeleteTask(respWriter http.ResponseWriter, request *http.Request, _ httprou
 	var remove Remove
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
+		fmt.Fprintln(respWriter, "Bad request: %v", err)
 		log.Println(err)
+		respWriter.WriteHeader(400)
 	}
 	err = json.Unmarshal(body, &remove)
 	if err != nil {
+		fmt.Fprintln(respWriter, "Bad request: %v", err)
 		log.Println(err)
+		respWriter.WriteHeader(400)
 	}
 
 	index, err := removeTaskByID(remove.ID)
@@ -31,6 +35,12 @@ func DeleteTask(respWriter http.ResponseWriter, request *http.Request, _ httprou
 	} else {
 		fmt.Fprintln(respWriter, "Task ID: "+string(index)+" found.")
 	}
+	if err != nil {
+		fmt.Fprintln(respWriter, "Bad request: %v", err)
+		log.Println(err)
+		respWriter.WriteHeader(400)
+	}
+
 }
 
 func removeTaskByID(taskID int) (int, error) {
