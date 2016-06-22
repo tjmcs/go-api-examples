@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -25,7 +26,7 @@ func Index(respWriter http.ResponseWriter, request *http.Request, params httprou
 	htmlParagraph(&htmlOut, "/delete")
 	htmlParagraph(&htmlOut, "/search")
 	htmlParagraph(&htmlOut, "/list")
-	htmlParagraph(&htmlOut, "/checkout")
+	htmlParagraph(&htmlOut, "/checkoff")
 
 	respWriter.Header().Set("Content-Type", "text/html; charset=utf-8")
 	respWriter.Write([]byte(htmlOut))
@@ -48,6 +49,7 @@ func SearchTask(respWriter http.ResponseWriter, request *http.Request, params ht
 	}
 
 	var indicies []int
+	fmt.Fprintln(respWriter, "Searching for "+query.Word)
 	timezero := time.Time{}
 	if query.Word != "" {
 		indicies = append(indicies, searchByWord(query.Word)[:]...)
@@ -55,6 +57,20 @@ func SearchTask(respWriter http.ResponseWriter, request *http.Request, params ht
 		indicies = append(indicies, searchByTime(query.TimeBefore)[:]...)
 	} else {
 		fmt.Println("Undefined search query")
+	}
+
+	if len(indicies) == 0 {
+		fmt.Fprintln(respWriter, "No Results!!!!!")
+	}
+	for _, index := range indicies {
+		accessTasks.Lock()
+		prettyJson, err := json.MarshalIndent(allTasks[index], "", "  ")
+		accessTasks.Unlock()
+		if err != nil {
+			log.Print(err)
+			return
+		}
+		fmt.Fprintln(respWriter, string(prettyJson))
 	}
 }
 
