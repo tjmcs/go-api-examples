@@ -61,6 +61,7 @@ func main() {
 
 	// Start the API
 	router := httprouter.New()
+	router.GET("/", Index)
 	router.GET("/search", SearchTask)
 	router.GET("/list", ListTask)
 	router.POST("/add", AddTask)
