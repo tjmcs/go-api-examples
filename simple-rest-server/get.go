@@ -15,14 +15,17 @@ type Search struct {
 	TimeBefore time.Time `json:"before"`
 }
 
-func Index(respWriter http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	htmlOut := `Todo List API.
+func htmlParagraph(text *string, paragraph string) {
+	*text += "\n<p>" + paragraph + "</p>"
+}
 
-<p>/add</p>
-<p>/delete</p>
-<p>/search</p>
-<p>/list</p>
-`
+func Index(respWriter http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	htmlOut := `Todo List API.`
+	htmlParagraph(&htmlOut, "/add")
+	htmlParagraph(&htmlOut, "/delete")
+	htmlParagraph(&htmlOut, "/search")
+	htmlParagraph(&htmlOut, "/list")
+	htmlParagraph(&htmlOut, "/checkout")
 
 	respWriter.Header().Set("Content-Type", "text/html; charset=utf-8")
 	respWriter.Write([]byte(htmlOut))
