@@ -29,7 +29,6 @@ func Index(respWriter http.ResponseWriter, request *http.Request, params httprou
 }
 
 func ListTask(respWriter http.ResponseWriter, request *http.Request, params httprouter.Params) {
-
 	output, _ := json.MarshalIndent(allTasks, "", "  ")
 	fmt.Fprintln(respWriter, string(output))
 }

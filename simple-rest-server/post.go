@@ -3,15 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-
 	"github.com/julienschmidt/httprouter"
+	"io/ioutil"
+	"log"
+	"net/http"
 )
-
-type Remove struct {
-	ID int `json:"id"`
-}
 
 func AddTask(respWriter http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	var task Task
@@ -32,5 +28,42 @@ func AddTask(respWriter http.ResponseWriter, request *http.Request, _ httprouter
 	accessTasks.Unlock()
 
 	saveCSV()
+}
 
+type Check struct {
+	ID int `json:"id"`
+}
+
+func CheckOff(respWriter http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+	var check Check
+	body, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	err = json.Unmarshal(body, &check)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	checkTaskAsComplete(check.ID)
+}
+
+func checkTaskAsComplete(taskID int) (err error) {
+	// Get the index.
+	index, err := getIndexByTaskID(taskID)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	// Lock the tasks.
+	accessTasks.Lock()
+
+	// Set the task to checked.
+	allTasks[index].Checked = true
+
+	accessTasks.Unlock()
+	return
 }

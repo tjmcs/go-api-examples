@@ -15,12 +15,11 @@ import (
 )
 
 func getIndexByTaskID(taskID int) (index int, err error) {
-	// We didn't find the task ID - return an error and set the index to -1...
+	// If we didn't find the task ID - return an error and set the index to -1...
 	err = errors.New("GetIndexByTaskID: TaskID " + string(taskID) + " Not Found.")
 	index = -1
 
 	accessTasks.Lock()
-	defer accessTasks.Unlock()
 
 	// Search for the taskID and return the index.
 	for i, line := range allTasks {
@@ -30,6 +29,7 @@ func getIndexByTaskID(taskID int) (index int, err error) {
 			break
 		}
 	}
+	accessTasks.Unlock()
 	return
 }
 
@@ -55,9 +55,12 @@ func main() {
 	// Loading the csv file into the RAM
 	csvfile, err := os.Open("tasks.csv")
 	ifPanic(err)
+
+	// Loading csv with csv Library returns [][]string
 	rawCSVdata, err := csv.NewReader(csvfile).ReadAll()
 	ifPanic(err)
 
+	// For each line in csv do....
 	for i, each := range rawCSVdata {
 		timeAdded, err := time.Parse(timeFormat, each[2])
 		ifPanic(err)
@@ -72,6 +75,8 @@ func main() {
 
 	// Autosave every minutes
 	csvfile.Close()
+
+	// go func() starts a new process.
 	go func() {
 		for {
 			saveCSV()
@@ -85,11 +90,13 @@ func main() {
 	router.GET("/search", SearchTask)
 	router.GET("/list", ListTask)
 	router.POST("/add", AddTask)
+	router.POST("/checkoff", CheckOff)
 	router.DELETE("/delete", DeleteTask)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
+// Function to save the CSV
 func saveCSV() {
 	myString := ""
 	accessTasks.Lock()
