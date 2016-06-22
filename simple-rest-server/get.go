@@ -10,16 +10,15 @@ import (
 	"time"
 )
 
-/*
- *
- */
 type Search struct {
 	Word       string    `json:"search"`
 	TimeBefore time.Time `json:"before"`
 }
 
 func ListTask(respWriter http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	fmt.Fprintf(respWriter, "Show Details for ToDo")
+
+	output, _ := json.MarshalIndent(allTasks, "", "  ")
+	fmt.Fprintln(respWriter, string(output))
 }
 
 func SearchTask(respWriter http.ResponseWriter, request *http.Request, params httprouter.Params) {
