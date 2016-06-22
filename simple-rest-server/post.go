@@ -21,7 +21,10 @@ func AddTask(respWriter http.ResponseWriter, request *http.Request, _ httprouter
 	}
 
 	accessTasks.Lock()
-	task.ID = allTasks[len(allTasks)-1].ID + 1
+	task.ID = 0
+	if len(allTasks) > 0 {
+		task.ID = allTasks[len(allTasks)-1].ID + 1
+	}
 
 	allTasks = append(allTasks, task)
 	accessTasks.Unlock()

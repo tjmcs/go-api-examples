@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -15,14 +16,17 @@ type Search struct {
 	TimeBefore time.Time `json:"before"`
 }
 
-func Index(respWriter http.ResponseWriter, request *http.Request, params httprouter.Params) {
-	htmlOut := `Todo List API.
+func htmlParagraph(text *string, paragraph string) {
+	*text += "\n<p>" + paragraph + "</p>"
+}
 
-<p>/add</p>
-<p>/delete</p>
-<p>/search</p>
-<p>/list</p>
-`
+func Index(respWriter http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	htmlOut := `Todo List API.`
+	htmlParagraph(&htmlOut, "/add")
+	htmlParagraph(&htmlOut, "/delete")
+	htmlParagraph(&htmlOut, "/search")
+	htmlParagraph(&htmlOut, "/list")
+	htmlParagraph(&htmlOut, "/checkoff")
 
 	respWriter.Header().Set("Content-Type", "text/html; charset=utf-8")
 	respWriter.Write([]byte(htmlOut))
@@ -38,13 +42,19 @@ func SearchTask(respWriter http.ResponseWriter, request *http.Request, params ht
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		fmt.Println(err)
+		fmt.Fprintln(respWriter, "Bad request: %v", err)
+		log.Println(err)
+		respWriter.WriteHeader(400)
 	}
 	err = json.Unmarshal(body, &query)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(respWriter, "Bad request: %v", err)
+		log.Println(err)
+		respWriter.WriteHeader(400)
 	}
 
 	var indicies []int
+	fmt.Fprintln(respWriter, "Searching for "+query.Word)
 	timezero := time.Time{}
 	if query.Word != "" {
 		indicies = append(indicies, searchByWord(query.Word)[:]...)
@@ -52,6 +62,20 @@ func SearchTask(respWriter http.ResponseWriter, request *http.Request, params ht
 		indicies = append(indicies, searchByTime(query.TimeBefore)[:]...)
 	} else {
 		fmt.Println("Undefined search query")
+	}
+
+	if len(indicies) == 0 {
+		fmt.Fprintln(respWriter, "No Results!!!!!")
+	}
+	for _, index := range indicies {
+		accessTasks.Lock()
+		prettyJson, err := json.MarshalIndent(allTasks[index], "", "  ")
+		accessTasks.Unlock()
+		if err != nil {
+			log.Print(err)
+			return
+		}
+		fmt.Fprintln(respWriter, string(prettyJson))
 	}
 }
 
