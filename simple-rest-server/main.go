@@ -70,26 +70,29 @@ func main() {
 
 	router.GET("/v1/task", ListTask)
 	router.POST("/v1/task", AddTask)
-	router.PUT("/v1/task", nil)
-	router.DELETE("/v1/task", nil)
+	//router.PUT("/v1/task", nil)
+	//router.DELETE("/v1/task", nil)
 
-	router.GET("/v1/task/:id", SearchTask)
-	router.POST("/v1/task/:id", nil)
+	router.GET("/v1/task/:id", GetTask)
+	//router.POST("/v1/task/:id", nil)
 	router.PUT("/v1/task/:id", Modify)
 	router.DELETE("/v1/task/:id", DeleteTask)
+
+	router.GET("/v1/query", SearchTask)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
 // Function to save the CSV
-func saveCSV() {
+func saveCSV() error {
 	myString := ""
 	accessTasks.Lock()
 	for _, each := range allTasks {
 		myString += fmt.Sprintf("%v,%v,%v,%v,\"%v\"\n", each.ID, each.Checked, each.TimeAdded.Format(timeFormat), each.Deadline.Format(timeFormat), each.Task)
 	}
-	ioutil.WriteFile("tasks.csv", []byte(myString), 0644)
+	err := ioutil.WriteFile("tasks.csv", []byte(myString), 0644)
 	accessTasks.Unlock()
+	return err
 }
 
 func ifPanic(err error) {

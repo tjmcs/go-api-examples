@@ -3,12 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/julienschmidt/httprouter"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 type Search struct {
@@ -34,6 +36,23 @@ func Index(respWriter http.ResponseWriter, request *http.Request, params httprou
 
 func ListTask(respWriter http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	output, _ := json.MarshalIndent(allTasks, "", "  ")
+	fmt.Fprintln(respWriter, string(output))
+}
+
+func GetTask(respWriter http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	i, err := strconv.Atoi(params.ByName("id"))
+	if err != nil {
+		fmt.Fprintf(respWriter, "Bad request: %v", err)
+		respWriter.WriteHeader(400)
+		return
+	}
+	i, err = getIndexByTaskID(i)
+	if err != nil {
+		fmt.Fprintf(respWriter, "Bad request: %v", err)
+		respWriter.WriteHeader(400)
+		return
+	}
+	output, _ := json.MarshalIndent(allTasks[i], "", "  ")
 	fmt.Fprintln(respWriter, string(output))
 }
 
